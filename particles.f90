@@ -30,7 +30,8 @@ module particles
      ! the next values vary on time
      integer, pointer :: neighbours(:)
      integer :: number_of_neighbours
-     integer :: cluster
+     integer :: cluster  ! -1 means that it isn't in a cluster
+                         ! -2 means that it's already in the queue
   end type Particle
 
 contains
@@ -106,6 +107,13 @@ contains
     integer :: id, n, itr
 
     call init_queue(q, qsize)
+    
+    if (is_in_cluster(startp)) then
+       write (*,'(A)', advance='no') ">>>"
+       call print_particle(startp)
+       return
+    end if
+
     call push(q, startp%id)
 
     do while (.not. is_empty(q))
@@ -118,7 +126,10 @@ contains
           n = p%neighbours(itr)
           if (n > 0) then 
              p1 => parray(n)
-             if ((p1%type == p%type) .and. (p1%cluster /= tag)) then
+             if ((p1%type == p%type) .and. &
+                  (p1%cluster == -1) .and. &
+                  (p1%cluster /= -2)) then
+                p1%cluster = -2  ! mark as already in the queu
                 call push(q, p%neighbours(itr))
              end if
           end if

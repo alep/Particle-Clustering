@@ -84,7 +84,7 @@ contains
     type (Queue), intent(in) :: q
     logical :: full
     
-    if (q%qnext == q%qstart) then 
+    if ((q%qnext == q%qstart) .and. (q%qelems == q%qsize)) then 
        full = .true.
     else
        full = .false.
